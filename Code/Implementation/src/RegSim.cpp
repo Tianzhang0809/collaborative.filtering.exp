@@ -3,7 +3,6 @@
 
 float RegSim::getScore(const int &user_id, const int &movie_id)
 {
-    
     vector<ScorePair>* sim_list = permute(user_id, movie_id);
     vector<ScorePair>* rating_list=this->getRatingList(user_id,movie_id);
     vector<ScorePair>::iterator sim_it=sim_list->begin();
@@ -39,30 +38,12 @@ float RegSim::getScore(const int &user_id, const int &movie_id)
     return score;
 }
 
-float RegSim::computeSim(vector<ScorePair>* a, vector<ScorePair>* b, int style)
-{
-    vector<ScorePair>::iterator i = a -> begin();
-    vector<ScorePair>::iterator j = b -> begin();
-    float score = 0;
-    while (i != a -> end() && j != b -> end()){
-        if (i -> id < j -> id){
-            i++;
-        }else if (i -> id > j -> id){
-            j++;
-        }else{
-            if (style == 0)
-                score += (i->score)*(j->score);
-            else
-                score += (i->score_norm)*(j->score_norm);
-            i++;
-            j++;
-        }
-    }
-    return score;
-}
-
 vector<ScorePair>* RegSim::permute(const int &user_id, const int &movie_id)
 {
+    int _maxIt = 10;//50;
+    float _lambda = 0.2;
+    float _t = 0.5;
+
     int pk = getPK(user_id, movie_id);
     // If precalculatd
     if (_permute_map.find(pk) != _permute_map.end()){
@@ -73,7 +54,7 @@ vector<ScorePair>* RegSim::permute(const int &user_id, const int &movie_id)
     // X'y: score attribute
     vector<ScorePair>* Xty = this -> getSimList(user_id, movie_id);
     vector<ScorePair>* y = this -> getFirstList(user_id, movie_id);
-    vector<ScorePair>* b;
+    vector<ScorePair>* b = new vector<ScorePair>(_k);
 
     int it = 0;
     while (it < _maxIt){
@@ -83,7 +64,7 @@ vector<ScorePair>* RegSim::permute(const int &user_id, const int &movie_id)
                 // init
                 ScorePair pair;
                 pair.id = (*Xty)[i].id; 
-                pair.score = (double) rand() / (RAND_MAX);
+                pair.score = (*Xty)[i].score;
                 b -> push_back(pair);
             }else{
                 // train a regression
@@ -100,19 +81,19 @@ vector<ScorePair>* RegSim::permute(const int &user_id, const int &movie_id)
                     gd += (*XiSims)[k].score * (*b)[k].score;
                 }
                 //  b = b - t/k * f'(b);
-                (*b)[i] -= _t/k*gd;
+                (*b)[i].score -= _t/it*gd;
             }
-            norm += (*b)[i]*(*b)[i];
+            norm += (*b)[i].score*(*b)[i].score;
         }
         // normalize b
         norm = sqrt(norm);
         for (int i = 0; i != b -> size(); ++i){
-            (*b)[i] /= norm;
+            (*b)[i].score /= norm;
         }
         it ++;
     }
 
-    _permute_map.insert(primary_key, b);
+    _permute_map.insert(pair<int, vector<ScorePair>*>(pk, b));
     return b;
 }
  
