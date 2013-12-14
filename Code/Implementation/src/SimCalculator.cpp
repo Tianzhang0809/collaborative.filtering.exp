@@ -3,9 +3,9 @@
 	 -- All other Algorithm class: MovieMovieSim MovieMovieSimNorm UserUSerSimNorm MySim 
 	 		all inherits this class
 */
-
 #include "SimCalculator.h"
 #include "MovieTestList.h"
+#include <math.h>
 
 // Constructor
 SimCalculator::SimCalculator(string &query_url, const int k):
@@ -79,6 +79,9 @@ void SimCalculator::calculate(ostream &out)
     MovieList* ml;
     map<int, MovieList*>::iterator it;
     MovieTestList* test_list = MovieTestList::getInstance();
+
+    vector<float> result; 
+    vector<float> truth;
     for (it = test_list->begin(); it != test_list->end(); it++){
         ml = it -> second;
         movie_id = ml -> id;
@@ -87,9 +90,28 @@ void SimCalculator::calculate(ostream &out)
             ScorePair us = (*l)[i];
             user_id = us.id;
             float score = getScore(user_id, movie_id);
-            out<<score<<" "<<us.score<<'\n';
+            if (!isnan(score)){
+                result.push_back(score);
+                truth.push_back(us.score);
+                out<<score<<" "<<us.score<<'\n';
+            }
         }
     }
+
+    printRMSE(result, truth);
+}
+
+void SimCalculator::printRMSE(vector<float> &result, vector<float> &truth)
+{
+   int count = 0;
+   float err = 0;
+   for (int i = 0; i != result.size(); ++i){
+      err += (result[i]-truth[i])*(result[i]-truth[i]); 
+      count ++;
+   }
+   err /= count;
+   err = sqrt(err);
+   cout<<"RMSE:"<< err<<endl;
 }
 
 float SimCalculator::getScore(const int &user_id, const int &movie_id)

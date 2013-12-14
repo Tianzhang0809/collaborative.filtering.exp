@@ -6,7 +6,7 @@
 #include "MovieTestList.h"
 
 CorpusExp::CorpusExp(const string &dir_name, const string &mode):
-	_dir_name(dir_name),
+    _dir_name(dir_name),
 	_mode(mode),
 	_movie_count(0),
 	_user_count(0),
@@ -100,16 +100,23 @@ inline void CorpusExp::read_one_file(const string &file_name)
 			token=strtok(NULL,",");
 			index++;
 		}
+
+        UserDictionary* u_dict=UserDictionary::getInstance();
         // Randomly eliminate to generate test file
         // temporarily set test_ratio to be 10
-        int test_ratio = 5;
+        int test_ratio = 20;
         if (rand() % 10000 < test_ratio){
+            // Handle user list
+            if (! u_dict -> existUser(user_id)){
+                _user_count ++;
+                UserList* ul = new UserList(user_id);
+                u_dict -> addUser(user_id, ul);
+            }
             // Goto Test
             testl -> add(user_id, rating); 
         }else{
             // Goto Train
             ml->add(user_id,rating); // add the <user,rating> pair into movie list
-            UserDictionary* u_dict=UserDictionary::getInstance();
             if (u_dict->existUser(user_id)){ // when the user id already exists
                 u_dict->getUser(user_id)->add(mid,rating); // add the <movie, rating> pair into user list
             }else{ // when the user id does not exists

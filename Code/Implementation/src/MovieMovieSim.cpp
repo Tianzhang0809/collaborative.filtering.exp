@@ -59,8 +59,12 @@ void MovieMovieSim::getCalculate_set(const int &user_id, const int &movie_id,set
 	}
 	
 	list<int>* user_set=_map_movie_users[oid];
+    // NULL Pointer avoidance
+    if (!user_set)
+        return;
+
 	list<int>::iterator user_it;
-	for (user_it=user_set->begin();user_it!=user_set->end();++user_it){
+	for (user_it = user_set->begin(); user_it != user_set->end(); ++user_it){
 		UserList* ml=_userDict->getUser((*user_it));
 		vector<ScorePair>::iterator it2;
 		for (it2=ml->begin();it2!=ml->end();++it2){

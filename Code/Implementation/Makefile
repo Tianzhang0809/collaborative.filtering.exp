@@ -6,7 +6,7 @@
 src=src
 #obj code directory:
 obj=obj
-ValFlag=-g -O2
+ValFlag=-g -O1
 
 files=src/main.cpp src/CorpusExp.cpp src/MovieList.cpp src/MovieDictionary.cpp src/UserDictionary.cpp src/UserList.cpp src/SimCache.cpp src/SimCalculator.cpp src/MovieMovieSim.cpp src/UserUserSimNorm.cpp src/MovieMovieSimNorm.cpp src/MySim.cpp src/MovieTestList.cpp
 recommend: $(files)

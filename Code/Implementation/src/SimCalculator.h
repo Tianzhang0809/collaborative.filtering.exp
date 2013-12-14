@@ -60,7 +60,8 @@ protected:
 	virtual vector<ScorePair>* getTopK(const int &user_id, const int &movie_id);
 	virtual void getCalculate_set(const int &user_id, const int &movie_id,set<int> &cal_set, vector<ScorePair>* &result);
 
-
+private:
+    void printRMSE(vector<float> &result, vector<float> &truth);
 };
 
 #endif
