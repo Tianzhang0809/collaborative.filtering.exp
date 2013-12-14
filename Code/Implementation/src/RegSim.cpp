@@ -15,8 +15,10 @@ float RegSim::getScore(const int &user_id, const int &movie_id)
             sid = sim_it->id;
             rid = rating_it->id;
             if (sid==rid){
-                    score+=sim_it->score*rating_it->score;
-                    weight+=sim_it->score;
+                    if (!isnan(sim_it -> score) && !isnan(rating_it->score)){
+                        score += sim_it->score*rating_it->score;
+                        weight += sim_it->score;
+                    }
                     sim_it++;
                     rating_it++;
             }else if (sid<rid){
@@ -42,7 +44,7 @@ vector<ScorePair>* RegSim::permute(const int &user_id, const int &movie_id)
 {
     int _maxIt = 10;//50;
     float _lambda = 0.2;
-    float _t = 0.5;
+    float _t = 0.1;
 
     int pk = getPK(user_id, movie_id);
     // If precalculatd
@@ -64,7 +66,7 @@ vector<ScorePair>* RegSim::permute(const int &user_id, const int &movie_id)
                 // init
                 ScorePair pair;
                 pair.id = (*Xty)[i].id; 
-                pair.score = (*Xty)[i].score;
+                pair.score = exp(-5*(1-(*Xty)[i].score));
                 b -> push_back(pair);
             }else{
                 // train a regression
@@ -83,13 +85,17 @@ vector<ScorePair>* RegSim::permute(const int &user_id, const int &movie_id)
                 //  b = b - t/k * f'(b);
                 (*b)[i].score -= _t/it*gd;
             }
+            // if ((*b)[i].score < 0)
+            //    (*b)[i].score = 0;
             norm += (*b)[i].score*(*b)[i].score;
+            if (i < 10)
+                cout<<i<<":"<<(*b)[i].score<<endl;
         }
         // normalize b
-        norm = sqrt(norm);
-        for (int i = 0; i != b -> size(); ++i){
-            (*b)[i].score /= norm;
-        }
+        // norm = sqrt(norm);
+        // for (int i = 0; i != b -> size(); ++i){
+        //    (*b)[i].score /= norm;
+        // }
         it ++;
     }
 
