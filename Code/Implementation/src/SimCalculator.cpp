@@ -5,16 +5,18 @@
 */
 
 #include "SimCalculator.h"
-	//constructor:
+#include "MovieTestList.h"
+
+// Constructor
 SimCalculator::SimCalculator(string &query_url, const int k):
 	_query_url(query_url),
 	_map_open(true),
 	_k(k)
-{	//Get the Singelton instances for the Maps of userlists movielist and cache
+{
+    //Get the Singelton instances for the Maps of userlists movielist and cache
 	_movieDict=MovieDictionary::getInstance();
 	_userDict=UserDictionary::getInstance();
 	_cache=SimCache::getInstance();
-
 
 	//Prepare two simple map for future cache save:
 	// we store two things: (1)for each user in the query file, we collect all the movie_id it has appeared in the query file
@@ -48,6 +50,11 @@ SimCalculator::SimCalculator(string &query_url, const int k):
 void SimCalculator::calculate(ostream &out)
 {
     // The entrance of this Class, from here we began calculation
+
+    /*
+     * Comment out
+     * this part is to originally read the old query file
+     *
 	ifstream infile(_query_url.c_str());
 	string line;
 	int movie_id;
@@ -64,6 +71,25 @@ void SimCalculator::calculate(ostream &out)
 			out<<score<<'\n';//write down the score
 		}
 	}
+    */
+    
+    string line;
+    int movie_id;
+    int user_id;
+    MovieList* ml;
+    map<int, MovieList*>::iterator it;
+    MovieTestList* test_list = MovieTestList::getInstance();
+    for (it = test_list->begin(); it != test_list->end(); it++){
+        ml = it -> second;
+        movie_id = ml -> id;
+        vector<ScorePair>* l = ml -> getList();
+        for (int i = 0; i < l->size(); i++){
+            ScorePair us = (*l)[i];
+            user_id = us.id;
+            float score = getScore(user_id, movie_id);
+            out<<score<<" "<<us.score<<'\n';
+        }
+    }
 }
 
 float SimCalculator::getScore(const int &user_id, const int &movie_id)

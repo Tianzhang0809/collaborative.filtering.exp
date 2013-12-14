@@ -31,10 +31,19 @@ int main(int argc, char* argv[])
 	infile>>url;
 	train_dir="../"+train_dir.substr(6,train_dir.length());
 	url="../"+url.substr(6,url.length());
+
+    // read the 3rd line, the k value
 	string ks;
-	infile>>ks; // read the 3rd line, the k value
-	ks=ks.substr(2,ks.length());  
-	int k=atoi(ks.c_str()); 
+	infile >> ks; 
+	ks = ks.substr(2, ks.length());  
+	int k = atoi(ks.c_str()); 
+
+    // Read the 4th line, the test ratio
+    string test_str;
+    infile >> test_str;
+    test_str = test_str.substr(5, test_str.length());
+    int test_ratio = atoi(test_str.c_str());
+    
 	//LOAD all the corpus into memory:
 	CorpusExp ce(train_dir,"all");
 	ce.calculate();
@@ -43,8 +52,7 @@ int main(int argc, char* argv[])
 			if (argc>=4 && strcmp(argv[2],"-u")==0){ // check user stats
 				int user_id=atoi(argv[3]);
 				ce.displayUser(cout,user_id);
-			}
-			else if (argc>=4 && strcmp(argv[2],"-m")==0){ // check movie stats
+			}else if (argc>=4 && strcmp(argv[2],"-m")==0){ // check movie stats
 				int movie_id=atoi(argv[3]);
 				ce.displayMovie(cout,movie_id);
 			}else{ // check the all (default) stats

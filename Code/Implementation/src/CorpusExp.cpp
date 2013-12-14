@@ -3,6 +3,7 @@
 
 */
 #include "CorpusExp.h"
+#include "MovieTestList.h"
 
 CorpusExp::CorpusExp(const string &dir_name, const string &mode):
 	_dir_name(dir_name),
@@ -16,7 +17,9 @@ CorpusExp::CorpusExp(const string &dir_name, const string &mode):
 }
 
 
-void CorpusExp::calculate(){// This is the function to read the training data set
+void CorpusExp::calculate()
+{
+    // This is the function to read the training data set
 	vector<string> files;
 
 	DIR *dpdf;
@@ -35,7 +38,10 @@ void CorpusExp::calculate(){// This is the function to read the training data se
 		read_one_file((*it));
 	}
 }
-void CorpusExp::displayAll(ostream &out){ // the funciton to generate the general statistical data
+
+void CorpusExp::displayAll(ostream &out)
+{
+    // the funciton to generate the general statistical data
 	out<<"Total# of Movies:"<<_movie_count<<endl;
 	out<<"Total# of Users:"<<_user_count<<endl;
 	out<<"Rated as 1:"<<_movie_rated_count[0]<<endl;
@@ -44,19 +50,24 @@ void CorpusExp::displayAll(ostream &out){ // the funciton to generate the genera
 	out<<"Rated as 4:"<<_movie_rated_count[3]<<endl;
 	out<<"Rated as 5:"<<_movie_rated_count[4]<<endl;
 	float avg=0;
-	for (int i=0;i<5;i++)
+	for (int i=0; i<5; i++)
 		avg+=_movie_rated_count[i]*(i+1);
 	avg=avg/_pair_count;
 	out<<"Total Average rating:"<<avg<<endl;
 }
-void CorpusExp::displayUser(ostream &out, const int &id){
+
+void CorpusExp::displayUser(ostream &out, const int &id)
+{
 	UserDictionary::getInstance()->getUser(id)->displayStats(out);
 }
-void CorpusExp::displayMovie(ostream &out, const int &id){
+
+void CorpusExp::displayMovie(ostream &out, const int &id)
+{
 	MovieDictionary::getInstance()->getMovie(id)->displayStats(out);
 }
 
-inline void CorpusExp::read_one_file(const string &file_name){
+inline void CorpusExp::read_one_file(const string &file_name)
+{
 	_movie_count++; // STATISTICS_OP: +1 movie
 
 	string file_url=_dir_name+"/"+file_name;
@@ -65,9 +76,15 @@ inline void CorpusExp::read_one_file(const string &file_name){
 	infile>>line; // read the movie id
 	line=line.substr(0,line.length()-1);
 	int mid=atoi(line.c_str());// the movie_id
-	MovieList* ml=new MovieList(mid); // new a MovieList
-	MovieDictionary::getInstance()->addMovie(mid,ml);
+    
+    // new a MovieList
+	MovieList* ml=new MovieList(mid);
+	MovieDictionary::getInstance()->addMovie(mid, ml);
 
+    // new a Movielist for test
+    MovieList* testl = new MovieList(mid);
+    MovieTestList::getInstance() -> addMovie(mid, testl);
+    
 	while (infile>>line){  // for each line of the record
 		char * token;
 		token=strtok (strdup(line.c_str()),",");
@@ -83,17 +100,26 @@ inline void CorpusExp::read_one_file(const string &file_name){
 			token=strtok(NULL,",");
 			index++;
 		}
-		ml->add(user_id,rating); // add the <user,rating> pair into movie list
-		UserDictionary* u_dict=UserDictionary::getInstance();
-		if (u_dict->existUser(user_id)){ // when the user id already exists
-			u_dict->getUser(user_id)->add(mid,rating); // add the <movie, rating> pair into user list
-		}else{ // when the user id does not exists
-			_user_count++;// STATISTICS_OP: +1 user
-			UserList* ul=new UserList(user_id); 
-			ul->add(mid,rating); 
-			u_dict->addUser(user_id,ul);
-		}
-		_pair_count++; //STATISTICS_OP: +1 pair
-		_movie_rated_count[rating-1]++; //STATISTICS_OP: +1 count of rating
+        // Randomly eliminate to generate test file
+        // temporarily set test_ratio to be 10
+        int test_ratio = 5;
+        if (rand() % 10000 < test_ratio){
+            // Goto Test
+            testl -> add(user_id, rating); 
+        }else{
+            // Goto Train
+            ml->add(user_id,rating); // add the <user,rating> pair into movie list
+            UserDictionary* u_dict=UserDictionary::getInstance();
+            if (u_dict->existUser(user_id)){ // when the user id already exists
+                u_dict->getUser(user_id)->add(mid,rating); // add the <movie, rating> pair into user list
+            }else{ // when the user id does not exists
+                _user_count++;// STATISTICS_OP: +1 user
+                UserList* ul=new UserList(user_id); 
+                ul->add(mid,rating); 
+                u_dict->addUser(user_id,ul);
+            }
+            _pair_count++; //STATISTICS_OP: +1 pair
+            _movie_rated_count[rating-1]++; //STATISTICS_OP: +1 count of rating
+        }
 	}
 }	
