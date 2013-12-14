@@ -11,6 +11,8 @@ using namespace std;
 #include "UserUserSimNorm.h"
 #include "MovieMovieSimNorm.h"
 #include "MySim.h"
+#include "NMFCalculator.h"
+#include "RegSim.h"
 
 double diffclock(clock_t clock1,clock_t clock2)
 {
@@ -80,7 +82,19 @@ int main(int argc, char* argv[])
 				ofstream ofs("../result_m_4.txt");
 				algo4.calculate(ofs);
 				cout<<"result_file: result_m_4.txt"<<endl;
-			}
+			}else if (strcmp(argv[2], "5") == 0){
+                // Algorithm mode 5 ==> NMF algorithm
+                NMFCalculator algo5(k);
+                ofstream ofs("../result_m_5.txt");
+                algo5.calculate(ofs);
+                cout<<"result_file: result_m_5.txt"<<endl;
+            }else if (strcmp(argv[2], "6") == 0){
+                // Algorithm mode 6 ==> Regression
+                RegSim algo6(url, k);
+                ofstream ofs("../result_m_6.txt");
+                algo6.calculate(ofs);
+                cout<<"result_file: result_m_6.txt"<<endl;
+            }
 		}else if(strcmp(argv[1],"-h")==0){
 			cout<<"-s [none | -u USERID | -m MOVIEID]      Statistical Mode"<<endl;
 			cout<<"-m [1-4]                                Calculation Model Select"<<endl;

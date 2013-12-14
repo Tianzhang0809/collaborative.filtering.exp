@@ -8,7 +8,7 @@ src=src
 obj=obj
 ValFlag=-g -O1
 
-files=src/main.cpp src/CorpusExp.cpp src/MovieList.cpp src/MovieDictionary.cpp src/UserDictionary.cpp src/UserList.cpp src/SimCache.cpp src/SimCalculator.cpp src/MovieMovieSim.cpp src/UserUserSimNorm.cpp src/MovieMovieSimNorm.cpp src/MySim.cpp src/MovieTestList.cpp
+files=src/main.cpp src/CorpusExp.cpp src/MovieList.cpp src/MovieDictionary.cpp src/UserDictionary.cpp src/UserList.cpp src/SimCache.cpp src/SimCalculator.cpp src/MovieMovieSim.cpp src/UserUserSimNorm.cpp src/MovieMovieSimNorm.cpp src/MySim.cpp src/MovieTestList.cpp src/NMFCalculator.cpp src/RegSim.cpp
 recommend: $(files)
 	g++ $(ValFlag) $(Flag) $(files) -o recommend
 

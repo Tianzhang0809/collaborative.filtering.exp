@@ -28,6 +28,7 @@ class SimCalculator{
 public:
 	SimCalculator(string &query_url, const int k);
 	void calculate(ostream &out);
+
 protected:
 	//attributes:
 	string _query_url;
@@ -62,6 +63,7 @@ protected:
 
 private:
     void printRMSE(vector<float> &result, vector<float> &truth);
+
 };
 
 #endif
